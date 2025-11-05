@@ -2,9 +2,7 @@ openapi: 3.0.3
 info:
   title: BPost Mercury (FedEx) Integration API
   version: 1.0.0
-  description: >-
-    This document describes how to integrate with BPost Mercury (FedEx) through
-    Shipad's system.
+  description: "This document describes how to integrate with BPost Mercury (FedEx) through Shipad's system.\r\n\r\n### Root URL\r\nhttps://e3xxtprs11.execute-api.us-east-1.amazonaws.com/prod"
 servers:
   - url: https://e3xxtprs11.execute-api.us-east-1.amazonaws.com/prod
     description: Production server.
