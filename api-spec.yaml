@@ -1,0 +1,408 @@
+openapi: 3.0.3
+info:
+  title: BPost Mercury (FedEx) Integration API
+  version: 1.0.0
+  description: >-
+    This document describes how to integrate with BPost Mercury (FedEx) through
+    Shipad's system.
+servers:
+  - url: https://e3xxtprs11.execute-api.us-east-1.amazonaws.com/prod
+    description: Production server.
+paths:
+  /orders:
+    post:
+      summary: Create shipment order
+      description: ''
+      requestBody:
+        required: true
+        content:
+          application/xml:
+            schema:
+              $ref: '#/components/schemas/ShipRequest'
+            examples:
+              sample:
+                summary: Sample ShipRequest
+                value: |
+                  <ShipRequest>
+                    <Test>fales</Test>
+                    <Reference>TestK-2025110407</Reference>
+                    <InternalReference>Ord-2025110407</InternalReference>
+                    <ShipTo>
+                      <Name>John Palmer</Name>
+                      <Address1>339 Manila Dr</Address1>
+                      <Address2></Address2>
+                      <Address3></Address3>
+                      <City>San Jose</City>
+                      <State>California</State>
+                      <PostalCode>95119</PostalCode>
+                      <Country>US</Country>
+                      <Phone> +1 408-227-1267</Phone>
+                      <Email>john@test.com</Email>
+                      <Residential>true</Residential>
+                    </ShipTo>
+                    <ShipmentInsuranceFreight>20.65</ShipmentInsuranceFreight>
+                    <ItemsCurrency>USD</ItemsCurrency>
+                    <Packages>
+                      <Package>
+                        <WeightUnit>KG</WeightUnit>
+                        <Weight>1.5</Weight>
+                        <DimensionsUnit>IN</DimensionsUnit>
+                        <Height>12</Height>
+                        <PackageReference>Ord-2025110407-1</PackageReference>
+                      </Package>
+                    </Packages>
+                    <Items>
+                      <Item>
+                        <Sku></Sku>
+                        <Quantity>2</Quantity>
+                        <UnitPrice>93.99</UnitPrice>
+                        <Description>Rx Medication for personal use</Description>
+                        <HSCode>3004909900</HSCode>
+                        <CountryOfOrigin>CN</CountryOfOrigin>
+                      </Item>
+                      <Item>
+                        <Sku></Sku>
+                        <Quantity>1</Quantity>
+                        <UnitPrice>53.99</UnitPrice>
+                        <Description>Rx Medication for personal use</Description>
+                        <HSCode>3004909900</HSCode>
+                        <CountryOfOrigin>IN</CountryOfOrigin>
+                      </Item>
+                    </Items>
+                  </ShipRequest> [web:1][web:8][web:9]
+      responses:
+        '200':
+          description: ShipResponse
+          content:
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/ShipResponse'
+              examples:
+                sample:
+                  summary: Sample ShipResponse
+                  value: |
+                    <?xml version="1.0"?>
+                    <ShipResponse>
+                      <Result>
+                        <Success> true </Success>
+                        <ResultMessage> Shipment TestK-2025110407 successfully created and processed </ResultMessage>
+                        <ShippingCarrier> FedEx </ShippingCarrier>
+                        <ShippingCarrierServiceCode> LGUSFXGPR </ShippingCarrierServiceCode>
+                        <ShippingCarrierServiceDescription> FDX Postal Ground </ShippingCarrierServiceDescription>
+                        <Packages>
+                          <Package>
+                            <LabelImages>
+                              <LabelImage> base64 string </LabelImage>
+                            </LabelImages>
+                            <TrackingNumber> 394948962026 </TrackingNumber>
+                            <LandmarkTrackingNumber> LTN410741904N1 </LandmarkTrackingNumber>
+                            <PackageID> 412877600 </PackageID>
+                            <BarcodeData> 420951199261290374823437214678 </BarcodeData>
+                            <PackageReference> Ord-2025110407-1 </PackageReference>
+                          </Package>
+                        </Packages>
+                      </Result>
+                    </ShipResponse> [web:1][web:8][web:9]
+      tags:
+        - orders
+components:
+  schemas:
+    ShipRequest:
+      type: object
+      xml:
+        name: ShipRequest
+      properties:
+        Test:
+          type: boolean
+          description: 'true: testing purpose, false: production'
+        Reference:
+          type: string
+          xml:
+            name: Reference
+          description: Order number
+        InternalReference:
+          type: string
+          xml:
+            name: InternalReference
+          description: Another order reference
+        ShipTo:
+          $ref: '#/components/schemas/ShipTo'
+        ShipmentInsuranceFreight:
+          type: number
+          format: float
+          xml:
+            name: ShipmentInsuranceFreight
+          description: >-
+            Amount charged for shipping and any insurance for the whole order.
+            This value does not include the amount charged for purchased items
+            (i.e. Item Unit Value)
+        ItemsCurrency:
+          type: string
+          xml:
+            name: ItemsCurrency
+          description: >-
+            If used, pass the 3 character ISO 4217 code to represent the
+            currency (i.e. USD, CAD)
+        Packages:
+          type: array
+          xml:
+            name: Packages
+            wrapped: true
+          items:
+            $ref: '#/components/schemas/Package'
+        Items:
+          type: array
+          xml:
+            name: Items
+            wrapped: true
+          items:
+            $ref: '#/components/schemas/Item'
+      required:
+        - Reference
+        - ShipTo
+        - Packages
+        - Items [web:9][web:6]
+        - Test
+    ShipTo:
+      type: object
+      xml:
+        name: ShipTo
+      properties:
+        Name:
+          type: string
+          xml:
+            name: Name
+        Address1:
+          type: string
+          xml:
+            name: Address1
+        Address2:
+          type: string
+          xml:
+            name: Address2
+        Address3:
+          type: string
+          xml:
+            name: Address3
+        City:
+          type: string
+          xml:
+            name: City
+        State:
+          type: string
+          xml:
+            name: State
+        PostalCode:
+          type: string
+          xml:
+            name: PostalCode
+        Country:
+          type: string
+          xml:
+            name: Country
+          description: 2 character ISO code
+        Phone:
+          type: string
+          xml:
+            name: Phone
+          description: Optional, but encouraged
+        Email:
+          type: string
+          format: email
+          xml:
+            name: Email
+        Residential:
+          type: boolean
+          xml:
+            name: Residential
+      required:
+        - Name
+        - Address1
+        - City
+        - State
+        - PostalCode
+        - Country [web:9][web:6]
+        - Country
+    Package:
+      type: object
+      xml:
+        name: Package
+      properties:
+        WeightUnit:
+          type: string
+          xml:
+            name: WeightUnit
+          enum:
+            - KG
+            - LB
+          description: >-
+            Optional package weight Unit of Measure. Default is LB (pounds).
+            Supports LB, KG, G
+        Weight:
+          type: number
+          format: float
+          xml:
+            name: Weight
+          description: Default in LB
+        DimensionsUnit:
+          type: string
+          xml:
+            name: DimensionsUnit
+          enum:
+            - IN
+            - CM
+          description: >-
+            Optional package dimension Unit of Measure. Default is IN (inches).
+            Supports IN, CM
+        Height:
+          type: number
+          format: float
+          xml:
+            name: Height
+          description: Default in IN
+        PackageReference:
+          type: string
+          xml:
+            name: PackageReference
+          description: Optional.  Another reference for the client
+      required:
+        - Weight
+        - PackageReference [web:9][web:6]
+    Item:
+      type: object
+      xml:
+        name: Item
+      properties:
+        Sku:
+          type: string
+          xml:
+            name: Sku
+        Quantity:
+          type: integer
+          xml:
+            name: Quantity
+        UnitPrice:
+          type: number
+          format: float
+          xml:
+            name: UnitPrice
+          description: $USD
+        Description:
+          type: string
+          xml:
+            name: Description
+        HSCode:
+          type: string
+          xml:
+            name: HSCode
+        CountryOfOrigin:
+          type: string
+          xml:
+            name: CountryOfOrigin
+          description: 2 character ISO code
+      required:
+        - Quantity
+        - UnitPrice
+        - Description
+        - HSCode
+        - CountryOfOrigin [web:9][web:6]
+        - CountryOfOrigin
+    ShipResponse:
+      type: object
+      xml:
+        name: ShipResponse
+      properties:
+        Result:
+          $ref: '#/components/schemas/ShipResult'
+      required:
+        - Result [web:9][web:6]
+    ShipResult:
+      type: object
+      xml:
+        name: Result
+      properties:
+        Success:
+          type: boolean
+          xml:
+            name: Success
+        ResultMessage:
+          type: string
+          xml:
+            name: ResultMessage
+        ShippingCarrier:
+          type: string
+          xml:
+            name: ShippingCarrier
+          description: The name of the end-delivery carrier
+        ShippingCarrierServiceCode:
+          type: string
+          xml:
+            name: ShippingCarrierServiceCode
+        ShippingCarrierServiceDescription:
+          type: string
+          xml:
+            name: ShippingCarrierServiceDescription
+        Packages:
+          type: array
+          xml:
+            name: Packages
+            wrapped: true
+          items:
+            $ref: '#/components/schemas/ResponsePackage'
+      required:
+        - Success
+        - ResultMessage [web:9][web:6]
+    ResponsePackage:
+      type: object
+      xml:
+        name: Package
+      properties:
+        LabelImages:
+          type: array
+          xml:
+            name: LabelImages
+            wrapped: true
+          items:
+            type: string
+            xml:
+              name: LabelImage
+            description: Base64-encoded label image. [web:9]
+          description: >-
+            If the label requires multiple pages, there may be more than one
+            LabelImage
+        TrackingNumber:
+          type: string
+          xml:
+            name: TrackingNumber
+          description: Main tracking number for the order
+        LandmarkTrackingNumber:
+          type: string
+          xml:
+            name: LandmarkTrackingNumber
+        PackageID:
+          type: string
+          xml:
+            name: PackageID
+        BarcodeData:
+          type: string
+          xml:
+            name: BarcodeData
+        PackageReference:
+          type: string
+          xml:
+            name: PackageReference
+      required:
+        - TrackingNumber
+        - PackageReference [web:9][web:6]
+  securitySchemes:
+    jwt:
+      type: http
+      scheme: bearer
+tags:
+  - name: orders
+    description: ''
+    externalDocs:
+      description: ''
+      url: ''
+security:
+  - jwt: []
